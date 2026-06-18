@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>仪表盘 — 星链组网</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#f0f2f5;font-family:'Microsoft YaHei','Segoe UI',sans-serif;color:#333;display:flex;justify-content:center;padding:20px}
+.page{width:1920px;min-height:1554px;background:#f5f6f7;display:flex;flex-direction:column}
+.header{height:60px;background:#f5f6f7;border-bottom:1px solid #e8eaed;display:flex;align-items:center;padding:0 24px;flex-shrink:0}
+.header .logo{font-size:18px;font-weight:600;color:#1a73e8;margin-right:40px}
+.header .nav{display:flex;gap:32px}
+.header .nav a{color:#5f6368;text-decoration:none;font-size:14px;padding:4px 0;border-bottom:2px solid transparent}
+.header .nav a.active{color:#1a73e8;border-bottom-color:#1a73e8}
+.header .right{margin-left:auto;display:flex;align-items:center;gap:16px}
+.header .right .avatar{width:32px;height:32px;border-radius:50%;background:#1a73e8;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600}
+.main{display:flex;flex:1;padding:20px 24px;gap:20px}
+.left-panel{width:300px;flex-shrink:0}
+.left-card{background:#fff;border-radius:12px;border:1px solid #e8eaed;overflow:hidden;margin-bottom:16px}
+.left-card .hd{background:#eef3f8;padding:14px 18px;font-size:14px;font-weight:600;color:#1a2332;border-bottom:1px solid #e0e6ed}
+.left-card .bd{padding:12px 18px}
+.left-card .item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0f2f5;font-size:14px;color:#444;cursor:pointer}
+.left-card .item:last-child{border-bottom:none}
+.left-card .item .ic{width:20px;text-align:center;color:#1a73e8;font-size:16px}
+.left-card .item .bg{margin-left:auto;background:#e8f0fe;color:#1a73e8;font-size:11px;padding:1px 8px;border-radius:10px}
+.left-card .metric{padding:6px 0;font-size:13px;color:#666;line-height:2}
+.left-card .metric strong{float:right}
+.right-content{flex:1}
+.top-cards{display:flex;gap:16px;margin-bottom:20px}
+.sc{flex:1;background:#fff;border-radius:12px;border:1px solid #e8eaed;padding:18px 20px}
+.sc .lb{font-size:13px;color:#888;margin-bottom:4px}
+.sc .vl{font-size:28px;font-weight:700;color:#1a2332}
+.sc .ch{font-size:12px;color:#34a853;margin-top:4px}
+.sc .ch.dn{color:#ea4335}
+.sec{background:#fff;border-radius:12px;border:1px solid #e8eaed;padding:18px 20px;margin-bottom:20px}
+.sec .st{font-size:15px;font-weight:600;margin-bottom:12px;color:#1a2332;display:flex;align-items:center;gap:8px}
+.sec .st .tg{font-size:10px;background:#fde8ec;color:#cc3366;padding:1px 8px;border-radius:6px;font-weight:400}
+.cw{width:100%;aspect-ratio:2/1;border-radius:8px;overflow:hidden;background:#f5f7fa;border:1px solid #dde2e8}
+.cw canvas{width:100%;height:100%;display:block}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 12px;font-size:12px;color:#888;font-weight:500;border-bottom:2px solid #f0f2f5}
+td{padding:10px 12px;font-size:13px;color:#444;border-bottom:1px solid #f5f6f7}
+.st{display:inline-flex;align-items:center;gap:4px;font-size:12px}
+.st .d{width:8px;height:8px;border-radius:50%;display:inline-block}
+.st .d.g{background:#34a853}
+.st .d.r{background:#ea4335}
+.st .d.o{background:#fbbc04}
+.pb{width:80px;height:6px;background:#f0f2f5;border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle}
+.pb .fl{height:100%;border-radius:3px}
+.pb .fl.g{background:#34a853}
+.pb .fl.o{background:#fbbc04}
+.pb .fl.r{background:#ea4335}
+.ctl{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:10;display:flex;align-items:center;gap:12px;background:#fff;border-radius:10px;padding:8px 20px;box-shadow:0 4px 20px rgba(0,0,0,.1);border:1px solid #e8eaed}
+.ctl label{color:#666;font-size:13px}
+.ctl input[type=range]{width:180px}
+.ctl .pv{font-weight:700;color:#1a73e8;font-size:17px;min-width:36px;text-align:right}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="logo">📊 Dashboard</div>
+    <div class="nav">
+      <a href="#" class="active">概览</a>
+      <a href="#">监控</a>
+      <a href="#">告警</a>
+      <a href="#">日志</a>
+      <a href="#">设置</a>
+    </div>
+    <div class="right">
+      <span style="font-size:13px;color:#888">管理员</span>
+      <div class="avatar">A</div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="left-panel">
+      <div class="left-card">
+        <div class="hd">📋 导航菜单</div>
+        <div class="bd">
+          <div class="item"><span class="ic">🏠</span> 总览面板</div>
+          <div class="item"><span class="ic">📡</span> 信号监控 <span class="bg">3</span></div>
+          <div class="item"><span class="ic">🛰️</span> 卫星状态</div>
+          <div class="item"><span class="ic">📊</span> 数据分析</div>
+          <div class="item"><span class="ic">⚙️</span> 系统设置</div>
+        </div>
+      </div>
+      <div class="left-card">
+        <div class="hd">📈 实时指标</div>
+        <div class="bd">
+          <div class="metric">🟢 信号强度 <strong style="color:#34a853">92%</strong></div>
+          <div class="metric">🟡 链路质量 <strong style="color:#f9ab00">78%</strong></div>
+          <div class="metric">🔴 延迟 <strong style="color:#ea4335">45ms</strong></div>
+          <div class="metric">🔵 吞吐量 <strong style="color:#1a73e8">2.4 Gbps</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class="right-content">
+      <div class="top-cards">
+        <div class="sc"><div class="lb">卫星总数</div><div class="vl">24</div><div class="ch">↑ 3 新增</div></div>
+        <div class="sc"><div class="lb">在线率</div><div class="vl">97.5%</div><div class="ch">↑ 0.8%</div></div>
+        <div class="sc"><div class="lb">今日告警</div><div class="vl">7</div><div class="ch dn">↑ 2</div></div>
+        <div class="sc"><div class="lb">数据处理</div><div class="vl">1.2TB</div><div class="lb" style="margin-top:4px;font-size:12px">今日已处理</div></div>
+      </div>
+      <div class="sec">
+        <div class="st">🛸 星链组网实时状态 <span class="tg">重叠版</span></div>
+        <div class="cw"><canvas id="cv" width="800" height="400"></canvas></div>
+      </div>
+      <div class="sec">
+        <div class="st">📋 卫星链路明细</div>
+        <table>
+          <tr><th>卫星 ID</th><th>轨道</th><th>状态</th><th>信号强度</th><th>延迟</th><th>吞吐量</th></tr>
+          <tr><td>SAT-001</td><td>轨道 A</td><td><span class="st"><span class="d g"></span> 在线</span></td><td>92% <span class="pb"><span class="fl g" style="width:92%"></span></span></td><td>12ms</td><td>156 Mbps</td></tr>
+          <tr><td>SAT-002</td><td>轨道 A</td><td><span class="st"><span class="d g"></span> 在线</span></td><td>88% <span class="pb"><span class="fl g" style="width:88%"></span></span></td><td>14ms</td><td>142 Mbps</td></tr>
+          <tr><td>SAT-003</td><td>轨道 B</td><td><span class="st"><span class="d g"></span> 在线</span></td><td>95% <span class="pb"><span class="fl g" style="width:95%"></span></span></td><td>10ms</td><td>178 Mbps</td></tr>
+          <tr><td>SAT-004</td><td>轨道 B</td><td><span class="st"><span class="d o"></span> 不稳定</span></td><td>62% <span class="pb"><span class="fl o" style="width:62%"></span></span></td><td>34ms</td><td>67 Mbps</td></tr>
+          <tr><td>SAT-005</td><td>轨道 C</td><td><span class="st"><span class="d g"></span> 在线</span></td><td>97% <span class="pb"><span class="fl g" style="width:97%"></span></span></td><td>8ms</td><td>201 Mbps</td></tr>
+          <tr><td>SAT-006</td><td>轨道 C</td><td><span class="st"><span class="d r"></span> 离线</span></td><td>—</td><td>—</td><td>—</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="ctl">
+  <label>进度</label>
+  <input type="range" id="sl" min="0" max="100" value="42">
+  <span class="pv" id="sv">42%</span>
+</div>
+
+<script>
+const sl=document.getElementById('sl'),sv=document.getElementById('sv');
+let val=42,aid,gt=0;
+
+function rd(c,x,y,w,h,r){
+  r=Math.min(r,w/2,h/2);
+  c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);
+  c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);
+  c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);
+  c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);
+  c.quadraticCurveTo(x,y,x+r,y);c.closePath();
+}
+
+function earth(cx,cy,Er){
+  var p=val/100,ctx=document.getElementById('cv').getContext('2d');
+  var g=ctx.createRadialGradient(cx-2,cy-2,Er-4,cx,cy,Er+14);
+  g.addColorStop(0,'rgba(100,180,255,'+(0.12*p)+')');g.addColorStop(0.6,'rgba(100,180,255,'+(0.04*p)+')');g.addColorStop(1,'rgba(100,180,255,0)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,Er+14,0,6.28);ctx.fill();
+  g=ctx.createRadialGradient(cx-6,cy-6,4,cx,cy,Er);
+  g.addColorStop(0,'#4a8fd4');g.addColorStop(0.3,'#3578b8');g.addColorStop(0.6,'#235f9a');g.addColorStop(0.85,'#14467a');g.addColorStop(1,'#0a2d55');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,Er,0,6.28);ctx.fill();
+  ctx.fillStyle='rgba(65,160,80,'+(0.22+0.08*p)+')';
+  ctx.beginPath();ctx.moveTo(cx-16,cy-20);ctx.quadraticCurveTo(cx-12,cy-26,cx-4,cy-22);ctx.quadraticCurveTo(cx-1,cy-16,cx-8,cy-12);ctx.quadraticCurveTo(cx-14,cy-10,cx-18,cy-14);ctx.quadraticCurveTo(cx-20,cy-18,cx-16,cy-20);ctx.fill();
+  ctx.beginPath();ctx.moveTo(cx-12,cy-6);ctx.quadraticCurveTo(cx-6,cy-6,cx-5,cy-1);ctx.quadraticCurveTo(cx-4,cy+5,cx-7,cy+12);ctx.quadraticCurveTo(cx-10,cy+18,cx-14,cy+12);ctx.quadraticCurveTo(cx-16,cy+3,cx-12,cy-6);ctx.fill();
+  ctx.beginPath();ctx.moveTo(cx+2,cy-22);ctx.quadraticCurveTo(cx+7,cy-20,cx+11,cy-16);ctx.quadraticCurveTo(cx+14,cy-12,cx+12,cy-6);ctx.quadraticCurveTo(cx+11,cy+2,cx+14,cy+9);ctx.quadraticCurveTo(cx+16,cy+16,cx+10,cy+22);ctx.quadraticCurveTo(cx+7,cy+24,cx+5,cy+18);ctx.quadraticCurveTo(cx+3,cy+12,cx+5,cy+5);ctx.quadraticCurveTo(cx+4,cy-1,cx+1,cy-6);ctx.quadraticCurveTo(cx-1,cy-12,cx+2,cy-22);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,'+(0.03+0.02*p)+')';
+  for(var i=0;i<6;i++){var ca=gt/5000+i*1.2,cr=Er*0.3+Math.random()*Er*0.5;ctx.beginPath();ctx.ellipse(cx+cr*Math.cos(ca),cy+Er*0.3*Math.sin(ca*0.7),4+Math.random()*7,2+Math.random()*3,ca*0.5,0,6.28);ctx.fill();}
+  ctx.strokeStyle='rgba(255,255,255,'+(0.03+0.05*p)+')';ctx.lineWidth=0.3;
+  for(i=0;i<4;i++){ctx.beginPath();ctx.ellipse(cx,cy,Math.abs(Er*0.5*Math.sin(i/4*6.28+gt/5000)),Er,0,0,6.28);ctx.stroke();}
+}
+
+function draw(){
+  var cv=document.getElementById('cv');if(!cv)return;
+  var ctx=cv.getContext('2d');ctx.clearRect(0,0,800,400);
+  var p=val/100,cx=400,cy=200,Er=44;
+
+  ctx.fillStyle='#f5f7fa';ctx.fillRect(0,0,800,400);
+  for(var i=0;i<150;i++){var a=Math.random()*6.28,r=Math.random()*340;ctx.fillStyle='rgba(0,80,160,'+(0.01+0.03*p*(0.2+0.8*Math.sin(gt/1200+a*3)))+')';ctx.beginPath();ctx.arc(cx+r*Math.cos(a),cy+r*Math.sin(a),0.3+Math.random()*0.6,0,6.28);ctx.fill();}
+  var gd=ctx.createRadialGradient(cx,cy,0,cx,cy,300);
+  gd.addColorStop(0,'rgba(200,215,240,'+(0.04*p)+')');gd.addColorStop(0.5,'rgba(200,215,240,'+(0.015*p)+')');gd.addColorStop(1,'rgba(245,247,250,0)');
+  ctx.fillStyle=gd;ctx.fillRect(0,0,800,400);
+  earth(cx,cy,Er);
+  ctx.fillStyle='rgba(255,255,255,0.92)';ctx.font='bold 24px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,0.35)';ctx.shadowBlur=3;ctx.fillText(val+'%',cx,cy);ctx.shadowBlur=0;
+
+  var orbits=[{c:6,r:80,sp:0.3,ph:0},{c:8,r:120,sp:-0.2,ph:1.5},{c:10,r:160,sp:0.16,ph:2.8}];
+  for(var oi=0;oi<orbits.length;oi++){var ob=orbits[oi];
+    ctx.strokeStyle='rgba(0,119,204,'+(0.015+0.025*p)+')';ctx.lineWidth=0.3;ctx.setLineDash([2,10]);ctx.beginPath();ctx.arc(cx,cy,ob.r,0,6.28);ctx.stroke();ctx.setLineDash([]);}
+
+  var sz=1.8+p*0.6;
+  for(var oi=0;oi<orbits.length;oi++){var ob=orbits[oi];var vn=Math.floor(p*ob.c);
+    for(var i=0;i<vn;i++){var a=i/ob.c*6.28+gt/5000*ob.sp+ob.ph,x=cx+ob.r*Math.cos(a),y=cy+ob.r*Math.sin(a);
+      ctx.fillStyle='rgba(0,119,204,'+(0.2+0.35*p)+')';ctx.fillRect(x-sz*2.4,y-sz*0.8,sz*1.2,sz*1.6);ctx.fillRect(x+sz*1.2,y-sz*0.8,sz*1.2,sz*1.6);
+      ctx.fillStyle='rgba(0,119,204,'+(0.45+0.65*p)+')';rd(ctx,x-sz*0.8,y-sz*0.5,sz*1.6,sz,1.5);ctx.fill();
+      ctx.strokeStyle='rgba(0,119,204,'+(0.2*p)+')';ctx.lineWidth=0.4;ctx.beginPath();ctx.moveTo(x,y-sz*0.5);ctx.lineTo(x,y-sz*1.6);ctx.stroke();}}
+
+  // 蓝色连接线
+  for(var oi=0;oi<orbits.length;oi++){var ob=orbits[oi];var vn=Math.floor(p*ob.c);
+    for(var i=0;i<vn-1;i++){var a1=i/ob.c*6.28+gt/5000*ob.sp+ob.ph,a2=(i+1)/ob.c*6.28+gt/5000*ob.sp+ob.ph;
+      ctx.strokeStyle='rgba(0,119,204,'+(0.04+0.08*p*(1-i/vn))+')';ctx.lineWidth=0.3+0.5*p*(1-i/vn);
+      ctx.beginPath();ctx.moveTo(cx+ob.r*Math.cos(a1),cy+ob.r*Math.sin(a1));ctx.lineTo(cx+ob.r*Math.cos(a2),cy+ob.r*Math.sin(a2));ctx.stroke();}}
+
+  // 红色激光
+  for(var oi=0;oi<orbits.length;oi++){var ob=orbits[oi];var vn=Math.floor(p*ob.c);if(vn<2)continue;
+    var si=Math.floor((gt/2800+oi*3.1)%(vn-1));var t=(gt/2200+oi*0.9)%1;
+    var a1=si/ob.c*6.28+gt/5000*ob.sp+ob.ph,a2=(si+1)/ob.c*6.28+gt/5000*ob.sp+ob.ph;
+    var x1=cx+ob.r*Math.cos(a1),y1=cy+ob.r*Math.sin(a1),x2=cx+ob.r*Math.cos(a2),y2=cy+ob.r*Math.sin(a2);
+    var px=x1+(x2-x1)*t,py=y1+(y2-y1)*t,sx=x1+(x2-x1)*Math.max(0,t-0.1),sy=y1+(y2-y1)*Math.max(0,t-0.1);
+    ctx.strokeStyle='rgba(220,50,60,'+(0.3+0.45*p)+')';ctx.lineWidth=1.4+1.4*p;
+    ctx.shadowColor='rgba(220,50,60,'+(0.25*p)+')';ctx.shadowBlur=5;ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(px,py);ctx.stroke();
+    ctx.shadowBlur=0;ctx.fillStyle='rgba(255,80,90,'+(0.35+0.55*p)+')';ctx.beginPath();ctx.arc(px,py,1.8+1.8*p,0,6.28);ctx.fill();}
+}
+
+function loop(t){gt=t||0;draw();aid=requestAnimationFrame(loop);}
+sl.addEventListener('input',function(){val=parseInt(sl.value);sv.textContent=val+'%';});
+loop();
+</script>
+</body>
+</html>

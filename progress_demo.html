@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>开机进度 — 地球 & 星链</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#f0f3f7;font-family:system-ui,-apple-system,sans-serif;padding:24px 16px;color:#1a2332}
+h1{text-align:center;font-size:22px;font-weight:300;letter-spacing:6px;color:#1a2332}
+h1 .a{color:#0077cc;font-weight:600}
+h1 .b{color:#cc3366;font-style:normal}
+.sub{text-align:center;font-size:12px;color:#8899aa;margin-bottom:16px;letter-spacing:2px}
+.ctl{text-align:center;margin:0 auto 18px;max-width:520px;background:#fff;border-radius:10px;padding:12px 20px;border:1px solid #dde2e8}
+.ctl label{color:#556677;font-size:13px}
+.ctl input[type=range]{width:260px;vertical-align:middle;-webkit-appearance:none;height:4px;border-radius:2px;background:linear-gradient(90deg,#0077cc,#cc3366,#8855cc);outline:none}
+.ctl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;cursor:pointer;border:2px solid #0077cc;box-shadow:0 0 8px rgba(0,119,204,.3)}
+.ctl .pv{display:inline-block;width:44px;font-weight:700;color:#0077cc;font-size:18px}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:1000px;margin:0 auto}
+.g3{grid-template-columns:1fr 1fr 1fr}
+.c{background:#fff;border-radius:14px;border:1px solid #dde2e8;padding:14px 12px 12px;text-align:center;box-shadow:0 2px 16px rgba(0,0,0,.05)}
+.c h3{font-size:14px;font-weight:600;letter-spacing:1px;color:#1a2332}
+.c .tg{display:inline-block;font-size:9px;padding:2px 10px;border-radius:8px;background:#e6f0fa;color:#0077cc;margin-bottom:6px;letter-spacing:1px}
+.c .tg2{background:#fde8ec;color:#cc3366}
+.w{position:relative;width:100%;aspect-ratio:2/1;margin:0 auto 4px;border-radius:8px;background:#f5f7fa;overflow:hidden;border:1px solid #dde2e8}
+.w canvas{width:100%;height:100%;display:block}
+.c .d{font-size:11px;color:#667788;line-height:1.4}
+@media(max-width:900px){.g{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<h1><span class="a">∥</span> SIGNAL <span class="b">BOOT</span> <span class="a">∥</span></h1>
+<p class="sub">全息地球 · 星链组网 A（重叠）· 星链组网 B（不重叠）</p>
+<div class="ctl">
+<label>进度</label>
+<input type="range" id="sl" min="0" max="100" value="35">
+<span class="pv" id="sv">35%</span>
+</div>
+<div class="g g3" id="app"></div>
+
+<script>
+const sl=document.getElementById('sl'), sv=document.getElementById('sv');
+let val=35, aid, gt=0;
+
+function rndRect(c,x,y,w,h,r){
+  r=Math.min(r,w/2,h/2);
+  c.beginPath();
+  c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);
+  c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);
+  c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();
+}
+
+// ─── 全息地球 ───
+function drawGL(ctx,w,h,v){
+  const p=v/100, cx=w/2, cy=h/2, R=Math.min(w,h)*0.30;
+  ctx.fillStyle='#f5f7fa'; ctx.fillRect(0,0,w,h);
+  for(let ri=0;ri<2;ri++){
+    const rr=R+12+ri*9;
+    ctx.strokeStyle='rgba(0,119,204,'+(0.04+0.05*p)+')'; ctx.lineWidth=0.5;
+    ctx.setLineDash([3,8]);
+    ctx.beginPath(); ctx.arc(cx,cy,rr,0,6.28); ctx.stroke(); ctx.setLineDash([]);
+    for(let m=0;m<8;m++){
+      ctx.fillStyle='rgba(0,119,204,'+(0.06*p)+')';
+      ctx.beginPath(); ctx.arc(cx+rr*Math.cos(m/8*6.28+gt/5000+ri),cy+rr*Math.sin(m/8*6.28+gt/5000+ri),1,0,6.28); ctx.fill();
+    }
+  }
+  const bg=ctx.createRadialGradient(cx,cy,R*0.3,cx,cy,R+30);
+  bg.addColorStop(0,'rgba(0,119,204,'+(0.015*p)+')');bg.addColorStop(0.6,'rgba(0,119,204,'+(0.03*p)+')');bg.addColorStop(1,'rgba(0,119,204,0)');
+  ctx.fillStyle=bg; ctx.beginPath(); ctx.arc(cx,cy,R+30,0,6.28); ctx.fill();
+  ctx.strokeStyle='rgba(0,119,204,'+(0.1+0.2*p)+')'; ctx.lineWidth=0.5;
+  for(let i=0;i<10;i++){ctx.beginPath();ctx.ellipse(cx,cy,Math.abs(R*0.72*Math.sin(i/10*6.28+gt/3000)),R,0,0,6.28);ctx.stroke();}
+  for(let i=1;i<5;i++){ctx.beginPath();ctx.ellipse(cx,cy-R+i*R*0.5,R*0.88,R*0.04,0,0,6.28);ctx.stroke();}
+  const pts=[[0.22,0.28],[0.68,0.22],[0.50,0.58],[0.82,0.48],[0.28,0.68],[0.12,0.52],[0.88,0.38],[0.58,0.78],[0.38,0.18],[0.72,0.65],[0.45,0.82],[0.15,0.72],[0.78,0.15],[0.62,0.35],[0.35,0.48]];
+  const vis=Math.floor(p*pts.length);const conn=Math.min(vis*2,Math.floor(p*(pts.length*2-2)));
+  for(let i=0;i<conn;i++){
+    const ai=i%vis,bi=(i+1+Math.floor(i/vis))%vis;if(ai===bi)continue;
+    const a=pts[ai],b=pts[bi];
+    const ax=cx+(a[0]-0.5)*R*1.9,ay=cy+(a[1]-0.5)*R*1.9,bx=cx+(b[0]-0.5)*R*1.9,by=cy+(b[1]-0.5)*R*1.9;
+    ctx.strokeStyle='rgba(0,119,204,'+(0.06+0.1*p*(1-i/conn))+')';ctx.lineWidth=0.5+0.8*p*(1-i/conn);
+    ctx.beginPath();ctx.moveTo(ax,ay);ctx.quadraticCurveTo((ax+bx)/2,(ay+by)/2-8*Math.sin(i*1.7),bx,by);ctx.stroke();
+  }
+  for(let i=0;i<vis;i++){
+    const bl=0.5+0.3*Math.sin(gt/2000+i*1.7);
+    const x=cx+(pts[i][0]-0.5)*R*1.9,y=cy+(pts[i][1]-0.5)*R*1.9;
+    ctx.beginPath();ctx.arc(x,y,3+2*bl,0,6.28);ctx.fillStyle='rgba(0,119,204,'+(0.04*bl*p)+')';ctx.fill();
+    ctx.beginPath();ctx.arc(x,y,1.2+1.2*bl,0,6.28);ctx.fillStyle='rgba(0,119,204,'+(0.3+0.5*p*bl)+')';ctx.fill();
+  }
+  ctx.fillStyle='rgba(0,119,204,'+(0.3+0.7*p)+')';
+  ctx.font='bold 26px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(v+'%',cx,cy);
+  ctx.fillStyle='#556677';ctx.font='8px sans-serif';ctx.textBaseline='top';
+  ctx.fillText('GLOBE  '+vis+'/'+pts.length+' stations',cx,cy+R+24);
+}
+
+// ─── 绘制地球（共用） ───
+function drawEarth(ctx,cx,cy,Er,p){
+  const atmo=ctx.createRadialGradient(cx-2,cy-2,Er-4,cx,cy,Er+18);
+  atmo.addColorStop(0,'rgba(100,180,255,'+(0.12*p)+')');atmo.addColorStop(0.6,'rgba(100,180,255,'+(0.04*p)+')');atmo.addColorStop(1,'rgba(100,180,255,0)');
+  ctx.fillStyle=atmo;ctx.beginPath();ctx.arc(cx,cy,Er+18,0,6.28);ctx.fill();
+  const og=ctx.createRadialGradient(cx-6,cy-6,4,cx,cy,Er);
+  og.addColorStop(0,'#4a8fd4');og.addColorStop(0.3,'#3578b8');og.addColorStop(0.6,'#235f9a');og.addColorStop(0.85,'#14467a');og.addColorStop(1,'#0a2d55');
+  ctx.fillStyle=og;ctx.beginPath();ctx.arc(cx,cy,Er,0,6.28);ctx.fill();
+  ctx.fillStyle='rgba(65,160,80,'+(0.25+0.1*p)+')';
+  ctx.beginPath();ctx.moveTo(cx-16,cy-20);ctx.quadraticCurveTo(cx-12,cy-26,cx-4,cy-22);ctx.quadraticCurveTo(cx-1,cy-16,cx-8,cy-12);ctx.quadraticCurveTo(cx-14,cy-10,cx-18,cy-14);ctx.quadraticCurveTo(cx-20,cy-18,cx-16,cy-20);ctx.fill();
+  ctx.beginPath();ctx.moveTo(cx-12,cy-6);ctx.quadraticCurveTo(cx-6,cy-6,cx-5,cy-1);ctx.quadraticCurveTo(cx-4,cy+5,cx-7,cy+12);ctx.quadraticCurveTo(cx-10,cy+18,cx-14,cy+12);ctx.quadraticCurveTo(cx-16,cy+3,cx-12,cy-6);ctx.fill();
+  ctx.beginPath();ctx.moveTo(cx+2,cy-22);ctx.quadraticCurveTo(cx+7,cy-20,cx+11,cy-16);ctx.quadraticCurveTo(cx+14,cy-12,cx+12,cy-6);ctx.quadraticCurveTo(cx+11,cy+2,cx+14,cy+9);ctx.quadraticCurveTo(cx+16,cy+16,cx+10,cy+22);ctx.quadraticCurveTo(cx+7,cy+24,cx+5,cy+18);ctx.quadraticCurveTo(cx+3,cy+12,cx+5,cy+5);ctx.quadraticCurveTo(cx+4,cy-1,cx+1,cy-6);ctx.quadraticCurveTo(cx-1,cy-12,cx+2,cy-22);ctx.fill();
+  ctx.beginPath();ctx.moveTo(cx+12,cy-18);ctx.quadraticCurveTo(cx+20,cy-22,cx+28,cy-16);ctx.quadraticCurveTo(cx+32,cy-10,cx+26,cy-4);ctx.quadraticCurveTo(cx+22,cy-1,cx+24,cy+5);ctx.quadraticCurveTo(cx+26,cy+12,cx+20,cy+9);ctx.quadraticCurveTo(cx+14,cy+3,cx+16,cy-3);ctx.quadraticCurveTo(cx+14,cy-10,cx+12,cy-18);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,'+(0.04+0.03*p)+')';
+  for(let i=0;i<6;i++){const ca=gt/5000+i*1.2,cr=Er*0.3+Math.random()*Er*0.5;ctx.beginPath();ctx.ellipse(cx+cr*Math.cos(ca),cy+Er*0.3*Math.sin(ca*0.7),5+Math.random()*8,2+Math.random()*3,ca*0.5,0,6.28);ctx.fill();}
+  ctx.strokeStyle='rgba(255,255,255,'+(0.04+0.06*p)+')';ctx.lineWidth=0.3;
+  for(let i=0;i<5;i++){ctx.beginPath();ctx.ellipse(cx,cy,Math.abs(Er*0.55*Math.sin(i/5*6.28+gt/5000)),Er,0,0,6.28);ctx.stroke();}
+}
+
+// ─── 星链 A：红色激光沿蓝色连接线走（重叠） ───
+function drawSKA(ctx,w,h,v){
+  const p=v/100,cx=w/2,cy=h/2,Er=36;
+  ctx.fillStyle='#f5f7fa';ctx.fillRect(0,0,w,h);
+  for(let i=0;i<150;i++){const a=Math.random()*6.28,r=Math.random()*Math.min(w,h)*0.46;ctx.fillStyle='rgba(0,80,160,'+(0.01+0.04*p*(0.2+0.8*Math.sin(gt/1200+a*3)))+')';ctx.beginPath();ctx.arc(cx+r*Math.cos(a),cy+r*Math.sin(a),0.3+Math.random()*0.7,0,6.28);ctx.fill();}
+  const gd=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(w,h)*0.38);
+  gd.addColorStop(0,'rgba(200,215,240,'+(0.05*p)+')');gd.addColorStop(0.5,'rgba(200,215,240,'+(0.02*p)+')');gd.addColorStop(1,'rgba(245,247,250,0)');
+  ctx.fillStyle=gd;ctx.fillRect(0,0,w,h);
+  drawEarth(ctx,cx,cy,Er,p);
+  ctx.fillStyle='rgba(255,255,255,0.9)';ctx.font='bold 20px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,0.3)';ctx.shadowBlur=3;ctx.fillText(v+'%',cx,cy);ctx.shadowBlur=0;
+
+  const orbits=[{cnt:5,r:60,sp:0.3,ph:0},{cnt:7,r:92,sp:-0.2,ph:1.5},{cnt:9,r:124,sp:0.16,ph:2.8}];
+  for(const ob of orbits){ctx.strokeStyle='rgba(0,119,204,'+(0.015+0.025*p)+')';ctx.lineWidth=0.3;ctx.setLineDash([2,10]);ctx.beginPath();ctx.arc(cx,cy,ob.r,0,6.28);ctx.stroke();ctx.setLineDash([]);}
+
+  // 卫星
+  const allNodes=[],satSz=1.6+p*0.8;
+  for(const ob of orbits){const vn=Math.floor(p*ob.cnt);for(let i=0;i<vn;i++){const a=i/ob.cnt*6.28+gt/5000*ob.sp+ob.ph,x=cx+ob.r*Math.cos(a),y=cy+ob.r*Math.sin(a);allNodes.push({x,y,r:ob.r,idx:i,cnt:ob.cnt,sp:ob.sp,ph:ob.ph});
+    ctx.fillStyle='rgba(0,119,204,'+(0.2+0.35*p)+')';ctx.fillRect(x-satSz*2.2,y-satSz*0.7,satSz*1.1,satSz*1.4);ctx.fillRect(x+satSz*1.1,y-satSz*0.7,satSz*1.1,satSz*1.4);
+    ctx.fillStyle='rgba(0,119,204,'+(0.45+0.65*p)+')';rndRect(ctx,x-satSz*0.7,y-satSz*0.45,satSz*1.4,satSz*0.9,1.5);ctx.fill();
+    ctx.strokeStyle='rgba(0,119,204,'+(0.2*p)+')';ctx.lineWidth=0.4;ctx.beginPath();ctx.moveTo(x,y-satSz*0.45);ctx.lineTo(x,y-satSz*1.6);ctx.stroke();
+  }}
+
+  // 蓝色连接线
+  for(const ob of orbits){const vn=Math.floor(p*ob.cnt);for(let i=0;i<vn-1;i++){const a1=i/ob.cnt*6.28+gt/5000*ob.sp+ob.ph,a2=(i+1)/ob.cnt*6.28+gt/5000*ob.sp+ob.ph;
+    ctx.strokeStyle='rgba(0,119,204,'+(0.04+0.08*p*(1-i/vn))+')';ctx.lineWidth=0.3+0.5*p*(1-i/vn);
+    ctx.beginPath();ctx.moveTo(cx+ob.r*Math.cos(a1),cy+ob.r*Math.sin(a1));ctx.lineTo(cx+ob.r*Math.cos(a2),cy+ob.r*Math.sin(a2));ctx.stroke();
+  }}
+
+  // 红色激光 —— 沿蓝色连接线走（重叠）
+  for(let oi=0;oi<orbits.length;oi++){
+    const ob=orbits[oi];const vn=Math.floor(p*ob.cnt);if(vn<2)continue;
+    const segIdx=Math.floor((gt/2800+oi*3.1)%(vn-1));
+    const t=(gt/2200+oi*0.9)%1;
+    const a1=segIdx/ob.cnt*6.28+gt/5000*ob.sp+ob.ph;
+    const a2=(segIdx+1)/ob.cnt*6.28+gt/5000*ob.sp+ob.ph;
+    const x1=cx+ob.r*Math.cos(a1),y1=cy+ob.r*Math.sin(a1);
+    const x2=cx+ob.r*Math.cos(a2),y2=cy+ob.r*Math.sin(a2);
+    const px=x1+(x2-x1)*t,py=y1+(y2-y1)*t;
+
+    // 红色激光拖尾（沿直线）
+    const tl=0.1;const ta=Math.max(0,t-tl);
+    const sx=x1+(x2-x1)*ta,sy=y1+(y2-y1)*ta;
+    ctx.strokeStyle='rgba(220,50,60,'+(0.35+0.5*p)+')';ctx.lineWidth=1.2+1.2*p;
+    ctx.shadowColor='rgba(220,50,60,'+(0.3*p)+')';ctx.shadowBlur=5;ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(px,py);ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.fillStyle='rgba(255,80,90,'+(0.4+0.6*p)+')';ctx.beginPath();ctx.arc(px,py,1.5+1.5*p,0,6.28);ctx.fill();
+  }
+
+  const ts=orbits.reduce((s,o)=>s+Math.floor(p*o.cnt),0),tm=orbits.reduce((s,o)=>s+o.cnt,0);
+  ctx.fillStyle='#556677';ctx.font='8px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';
+  ctx.fillText('VERSION A: 红色激光沿蓝色连接线（重叠）',cx,cy+Er+16);
+  ctx.fillText(ts+'/'+tm+' satellites  ·  laser on path',cx,cy+Er+28);
+  ctx.fillStyle='rgba(0,119,204,0.1)';ctx.font='7px sans-serif';ctx.textAlign='left';ctx.textBaseline='top';
+  ctx.fillText('● VERSION A',6,6);
+}
+
+// ─── 星链 B：红色激光独立路径（不重叠） ───
+function drawSKB(ctx,w,h,v){
+  const p=v/100,cx=w/2,cy=h/2,Er=36;
+  ctx.fillStyle='#f5f7fa';ctx.fillRect(0,0,w,h);
+  for(let i=0;i<150;i++){const a=Math.random()*6.28,r=Math.random()*Math.min(w,h)*0.46;ctx.fillStyle='rgba(0,80,160,'+(0.01+0.04*p*(0.2+0.8*Math.sin(gt/1200+a*3)))+')';ctx.beginPath();ctx.arc(cx+r*Math.cos(a),cy+r*Math.sin(a),0.3+Math.random()*0.7,0,6.28);ctx.fill();}
+  const gd=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(w,h)*0.38);
+  gd.addColorStop(0,'rgba(200,215,240,'+(0.05*p)+')');gd.addColorStop(0.5,'rgba(200,215,240,'+(0.02*p)+')');gd.addColorStop(1,'rgba(245,247,250,0)');
+  ctx.fillStyle=gd;ctx.fillRect(0,0,w,h);
+  drawEarth(ctx,cx,cy,Er,p);
+  ctx.fillStyle='rgba(255,255,255,0.9)';ctx.font='bold 20px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,0.3)';ctx.shadowBlur=3;ctx.fillText(v+'%',cx,cy);ctx.shadowBlur=0;
+
+  const orbits=[{cnt:5,r:60,sp:0.3,ph:0},{cnt:7,r:92,sp:-0.2,ph:1.5},{cnt:9,r:124,sp:0.16,ph:2.8}];
+  for(const ob of orbits){ctx.strokeStyle='rgba(0,119,204,'+(0.015+0.025*p)+')';ctx.lineWidth=0.3;ctx.setLineDash([2,10]);ctx.beginPath();ctx.arc(cx,cy,ob.r,0,6.28);ctx.stroke();ctx.setLineDash([]);}
+
+  // 卫星
+  const allNodes=[],satSz=1.6+p*0.8;
+  for(const ob of orbits){const vn=Math.floor(p*ob.cnt);for(let i=0;i<vn;i++){const a=i/ob.cnt*6.28+gt/5000*ob.sp+ob.ph,x=cx+ob.r*Math.cos(a),y=cy+ob.r*Math.sin(a);allNodes.push({x,y,r:ob.r});
+    ctx.fillStyle='rgba(0,119,204,'+(0.2+0.35*p)+')';ctx.fillRect(x-satSz*2.2,y-satSz*0.7,satSz*1.1,satSz*1.4);ctx.fillRect(x+satSz*1.1,y-satSz*0.7,satSz*1.1,satSz*1.4);
+    ctx.fillStyle='rgba(0,119,204,'+(0.45+0.65*p)+')';rndRect(ctx,x-satSz*0.7,y-satSz*0.45,satSz*1.4,satSz*0.9,1.5);ctx.fill();
+    ctx.strokeStyle='rgba(0,119,204,'+(0.2*p)+')';ctx.lineWidth=0.4;ctx.beginPath();ctx.moveTo(x,y-satSz*0.45);ctx.lineTo(x,y-satSz*1.6);ctx.stroke();
+  }}
+
+  // 蓝色连接线
+  for(const ob of orbits){const vn=Math.floor(p*ob.cnt);for(let i=0;i<vn-1;i++){const a1=i/ob.cnt*6.28+gt/5000*ob.sp+ob.ph,a2=(i+1)/ob.cnt*6.28+gt/5000*ob.sp+ob.ph;
+    ctx.strokeStyle='rgba(0,119,204,'+(0.04+0.08*p*(1-i/vn))+')';ctx.lineWidth=0.3+0.5*p*(1-i/vn);
+    ctx.beginPath();ctx.moveTo(cx+ob.r*Math.cos(a1),cy+ob.r*Math.sin(a1));ctx.lineTo(cx+ob.r*Math.cos(a2),cy+ob.r*Math.sin(a2));ctx.stroke();
+  }}
+
+  // 红色激光 —— 走弧形独立路径（不重叠）
+  for(let oi=0;oi<orbits.length;oi++){
+    const ob=orbits[oi];const vn=Math.floor(p*ob.cnt);if(vn<2)continue;
+    const segIdx=Math.floor((gt/2800+oi*3.1)%(vn-1));
+    const t=(gt/2600+oi*1.3)%1;
+    const a1=segIdx/ob.cnt*6.28+gt/5000*ob.sp+ob.ph;
+    const a2=(segIdx+1)/ob.cnt*6.28+gt/5000*ob.sp+ob.ph;
+    const x1=cx+ob.r*Math.cos(a1),y1=cy+ob.r*Math.sin(a1);
+    const x2=cx+ob.r*Math.cos(a2),y2=cy+ob.r*Math.sin(a2);
+
+    // 独立路径：向外拱起的弧线
+    const offset=12;const mx=(x1+x2)/2,my=(y1+y2)/2;
+    const dx=x2-x1,dy=y2-y1;const len=Math.sqrt(dx*dx+dy*dy);
+    const nx=-dy/len*offset,ny=dx/len*offset;
+
+    const px=mx+nx+(x1-mx-nx)*(1-t*2)+t*t*(x2-mx-nx)*2;
+    const py=my+ny+(y1-my-ny)*(1-t*2)+t*t*(y2-my-ny)*2;
+
+    // 拖尾
+    const tt=Math.max(0,t-0.08);
+    const pxt=mx+nx+(x1-mx-nx)*(1-tt*2)+tt*tt*(x2-mx-nx)*2;
+    const pyt=my+ny+(y1-my-ny)*(1-tt*2)+tt*tt*(y2-my-ny)*2;
+
+    ctx.strokeStyle='rgba(220,50,60,'+(0.3+0.45*p)+')';ctx.lineWidth=1+1.2*p;
+    ctx.shadowColor='rgba(220,50,60,'+(0.25*p)+')';ctx.shadowBlur=4;ctx.beginPath();ctx.moveTo(pxt,pyt);ctx.lineTo(px,py);ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.fillStyle='rgba(255,80,90,'+(0.35+0.55*p)+')';ctx.beginPath();ctx.arc(px,py,1.3+1.3*p,0,6.28);ctx.fill();
+  }
+
+  const ts=orbits.reduce((s,o)=>s+Math.floor(p*o.cnt),0),tm=orbits.reduce((s,o)=>s+o.cnt,0);
+  ctx.fillStyle='#556677';ctx.font='8px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';
+  ctx.fillText('VERSION B: 红色激光走弧形独立路径（不重叠）',cx,cy+Er+16);
+  ctx.fillText(ts+'/'+tm+' satellites  ·  laser offset path',cx,cy+Er+28);
+  ctx.fillStyle='rgba(0,119,204,0.1)';ctx.font='7px sans-serif';ctx.textAlign='left';ctx.textBaseline='top';
+  ctx.fillText('● VERSION B',6,6);
+}
+
+// ─── 渲染 ───
+const cards=[
+  {id:'gl',t:'全息地球',tag:'GLOBE',fn:drawGL,desc:'15信标站·光束互联·数据粒子'},
+  {id:'ska',t:'星链组网A',tag:'重叠',fn:drawSKA,desc:'红色激光沿蓝色连接线走（路径重叠）'},
+  {id:'skb',t:'星链组网B',tag:'不重叠',fn:drawSKB,desc:'红色激光走弧形独立路径（不重叠）'},
+];
+function build(){
+  const g=document.getElementById('app');g.innerHTML='';
+  cards.forEach(c=>{
+    const e=document.createElement('div');e.className='c';
+    e.innerHTML='<h3>'+c.t+'</h3><span class="tg'+(c.id==='ska'?' tg2':'')+'">'+c.tag+'</span><div class="w"><canvas id="cv-'+c.id+'" width="600" height="300"></canvas></div><p class="d">'+c.desc+'</p>';
+    g.appendChild(e);
+  });
+}
+function render(){cards.forEach(c=>{const cv=document.getElementById('cv-'+c.id);if(!cv)return;const cx=cv.getContext('2d');cx.clearRect(0,0,600,300);c.fn(cx,600,300,val);});}
+function loop(t){gt=t||0;render();aid=requestAnimationFrame(loop);}
+sl.addEventListener('input',()=>{val=parseInt(sl.value);sv.textContent=val+'%';});
+build();aid=requestAnimationFrame(loop);
+</script>
+</body>
+</html>

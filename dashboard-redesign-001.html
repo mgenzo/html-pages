@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>测试执行面板</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#f0f4f9;
+  font-family:'Google Sans','Segoe UI',system-ui,sans-serif;
+  display:flex;justify-content:center;padding:40px;
+  color:#1f1f1f;
+}
+.panel{
+  width:1431px;
+  background:#fff;
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 1px 3px rgba(0,0,0,.04),0 8px 32px rgba(0,0,0,.06);
+}
+
+/* ── Header ── */
+.head{
+  background:linear-gradient(135deg,#1a73e8 0%,#0d47a1 100%);
+  padding:28px 40px 24px;
+  color:#fff;
+}
+.head-top{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;
+}
+.head-top h1{font-size:22px;font-weight:500;letter-spacing:-.3px;display:flex;align-items:center;gap:10px}
+.head-top h1 .ic{font-size:24px}
+.head-ts{font-size:13px;opacity:.7;display:flex;align-items:center;gap:12px}
+.head-ts .dot{width:8px;height:8px;border-radius:50%;background:#34a853;display:inline-block;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* Header 底部指标 */
+.head-metrics{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:8px;
+}
+.hm{
+  background:rgba(255,255,255,.08);
+  border-radius:12px;
+  padding:12px 14px;
+  text-align:center;
+}
+.hm .vl{font-size:24px;font-weight:600}
+.hm .lb{font-size:11px;opacity:.65;margin-top:2px;letter-spacing:.3px}
+
+/* ── Body ── */
+.body{padding:28px 40px 24px}
+
+/* 概要卡片 */
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.sc{
+  background:#f8faff;border-radius:16px;padding:18px 20px;
+  border:1px solid #e8edf5;
+}
+.sc .lb{font-size:13px;color:#5f6368;margin-bottom:6px}
+.sc .vl{font-size:28px;font-weight:600;letter-spacing:-.5px}
+.sc .sub{font-size:12px;color:#5f6368;margin-top:2px}
+
+/* 全局进度条 */
+.global-progress{margin-bottom:28px}
+.gp-label{display:flex;justify-content:space-between;font-size:13px;color:#5f6368;margin-bottom:8px}
+.gp-track{height:12px;background:#eef1f6;border-radius:6px;overflow:hidden;position:relative}
+.gp-track .fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#1a73e8,#34a853);transition:width .8s cubic-bezier(.4,0,.2,1);position:relative}
+.gp-track .fill::after{content:'';position:absolute;top:0;right:0;width:60px;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25));border-radius:0 6px 6px 0}
+
+/* 时间信息行 */
+time-row{display:flex;gap:40px;margin-bottom:24px;font-size:14px;color:#3c4043}
+.time-row .label{color:#5f6368;margin-right:4px}
+
+/* 表头 */
+.list-head{
+  display:grid;
+  grid-template-columns:160px 1fr 130px 130px;
+  gap:16px;
+  padding:10px 16px;
+  background:#f0f4f9;
+  border-radius:10px;
+  margin-bottom:2px;
+  font-size:12px;
+  font-weight:500;
+  color:#5f6368;
+  letter-spacing:.3px;
+  text-transform:uppercase;
+}
+
+/* 行 */
+.row{
+  display:grid;
+  grid-template-columns:160px 1fr 130px 130px;
+  gap:16px;
+  align-items:center;
+  padding:14px 16px;
+  border-bottom:1px solid #f0f2f5;
+  transition:background .12s;
+}
+.row:hover{background:#f8faff;border-radius:8px}
+.row .name{font-size:14px;font-weight:500;color:#1f1f1f;display:flex;align-items:center;gap:8px}
+.row .name .tag{font-size:10px;background:#e8f0fe;color:#1a73e8;padding:0 8px;border-radius:8px;font-weight:400}
+.row .bar-wrap{height:8px;background:#eef1f6;border-radius:4px;overflow:hidden}
+.row .bar-wrap .fill{height:100%;border-radius:4px;transition:width .8s cubic-bezier(.4,0,.2,1);position:relative}
+.row .bar-wrap .fill::after{content:'';position:absolute;top:0;right:0;width:30px;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25));border-radius:0 4px 4px 0}
+.row .bar-wrap .fill.pass{background:linear-gradient(90deg,#34a853,#66bb6a)}
+.row .bar-wrap .fill.fail{background:linear-gradient(90deg,#ea4335,#ef5350)}
+.row .bar-wrap .fill.run{background:linear-gradient(90deg,#1a73e8,#4fc3f7)}
+.row .time{font-size:13px;color:#3c4043;font-family:'Google Sans',monospace}
+.row .status{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500}
+.row .status .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.row .status .dot.g{background:#34a853}
+.row .status .dot.r{background:#ea4335}
+.row .status .dot.b{background:#1a73e8}
+.row .status .txt.g{color:#1e8e3e}
+.row .status .txt.r{color:#c5221f}
+.row .status .txt.b{color:#1a73e8}
+
+/* 底部分隔 */
+.footer{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid #eef1f6;font-size:13px;color:#5f6368}
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <!-- Header -->
+  <div class="head">
+    <div class="head-top">
+      <h1><span class="ic">🧪</span> 测试用例执行面板</h1>
+      <div class="head-ts"><span class="dot"></span> <span id="clock">--:--:--</span></div>
+    </div>
+    <div class="head-metrics">
+      <div class="hm"><div class="vl">12</div><div class="lb">计划用例</div></div>
+      <div class="hm"><div class="vl">8</div><div class="lb">已完成</div></div>
+      <div class="hm"><div class="vl">3</div><div class="lb">执行中</div></div>
+      <div class="hm"><div class="vl">1</div><div class="lb">未执行</div></div>
+      <div class="hm"><div class="vl">7</div><div class="lb">PASS</div></div>
+      <div class="hm"><div class="vl">1</div><div class="lb">FAIL</div></div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="body">
+    <!-- 概要 -->
+    <div class="summary-grid">
+      <div class="sc"><div class="lb">📋 计划执行</div><div class="vl">12</div><div class="sub">本次测试计划总数</div></div>
+      <div class="sc"><div class="lb">✅ 已完成</div><div class="vl" style="color:#1e8e3e">8</div><div class="sub">66.7% 完成率</div></div>
+      <div class="sc"><div class="lb">🟢 PASS</div><div class="vl" style="color:#1e8e3e">7</div><div class="sub">通过率 87.5%</div></div>
+      <div class="sc"><div class="lb">🔴 FAIL</div><div class="vl" style="color:#c5221f">1</div><div class="sub">失败率 12.5%</div></div>
+    </div>
+
+    <!-- 全局进度 -->
+    <div class="global-progress">
+      <div class="gp-label">
+        <span>总体执行进度</span>
+        <span id="progressPct">66.7%</span>
+      </div>
+      <div class="gp-track">
+        <div class="fill" id="globalFill" style="width:66.7%"></div>
+      </div>
+    </div>
+
+    <!-- 时间 -->
+    <div class="time-row">
+      <span><span class="label">开始执行时间:</span> 2026-06-18 09:00:12</span>
+      <span><span class="label">已执行时间:</span> <span id="elapsedDisplay">18m 24s</span></span>
+    </div>
+
+    <!-- 列表表头 -->
+    <div class="list-head">
+      <span>测试用例</span>
+      <span>执行进度</span>
+      <span>开始时间</span>
+      <span>状态</span>
+    </div>
+
+    <!-- 行 -->
+    <div class="row">
+      <span class="name">TC-001 系统初始化</span>
+      <div class="bar-wrap"><div class="fill pass" style="width:100%"></div></div>
+      <span class="time">09:00:12</span>
+      <span class="status"><span class="dot g"></span><span class="txt g">PASS</span></span>
+    </div>
+    <div class="row">
+      <span class="name">TC-002 数据加载验证</span>
+      <div class="bar-wrap"><div class="fill pass" style="width:100%"></div></div>
+      <span class="time">09:01:05</span>
+      <span class="status"><span class="dot g"></span><span class="txt g">PASS</span></span>
+    </div>
+    <div class="row">
+      <span class="name">TC-003 网络连通性</span>
+      <div class="bar-wrap"><div class="fill pass" style="width:100%"></div></div>
+      <span class="time">09:01:30</span>
+      <span class="status"><span class="dot g"></span><span class="txt g">PASS</span></span>
+    </div>
+    <div class="row">
+      <span class="name">TC-004 信号强度校准</span>
+      <div class="bar-wrap"><div class="fill pass" style="width:100%"></div></div>
+      <span class="time">09:02:15</span>
+      <span class="status"><span class="dot g"></span><span class="txt g">PASS</span></span>
+    </div>
+    <div class="row">
+      <span class="name">TC-005 API接口测试</span>
+      <div class="bar-wrap"><div class="fill pass" style="width:100%"></div></div>
+      <span class="time">09:03:00</span>
+      <span class="status"><span class="dot g"></span><span class="txt g">PASS</span></span>
+    </div>
+    <div class="row">
+      <span class="name">TC-006 数据一致性</span>
+      <div class="bar-wrap"><div class="fill pass" style="width:100%"></div></div>
+      <span class="time">09:03:45</span>
+      <span class="status"><span class="dot g"></span><span class="txt g">PASS</span></span>
+    </div>
+    <div class="row">
+      <span class="name">TC-007 安全认证</span>
+      <div class="bar-wrap"><div class="fill pass" style="width:100%"></div></div>
+      <span class="time">09:04:20</span>
+      <span class="status"><span class="dot g"></span><span class="txt g">PASS</span></span>
+    </div>
+    <div class="row">
+      <span class="name">TC-008 日志归档</span>
+      <div class="bar-wrap"><div class="fill fail" style="width:100%"></div></div>
+      <span class="time">09:05:00</span>
+      <span class="status"><span class="dot r"></span><span class="txt r">FAIL</span></span>
+    </div>
+    <div class="row">
+      <span class="name">TC-009 数据库迁移</span>
+      <div class="bar-wrap"><div class="fill run" style="width:68%"></div></div>
+      <span class="time">09:06:30</span>
+      <span class="status"><span class="dot b"></span><span class="txt b">运行中 68%</span></span>
+    </div>
+    <div class="row">
+      <span class="name">TC-010 文件同步</span>
+      <div class="bar-wrap"><div class="fill run" style="width:45%"></div></div>
+      <span class="time">09:08:00</span>
+      <span class="status"><span class="dot b"></span><span class="txt b">运行中 45%</span></span>
+    </div>
+    <div class="row">
+      <span class="name">TC-011 数据校验</span>
+      <div class="bar-wrap"><div class="fill run" style="width:35%"></div></div>
+      <span class="time">09:10:00</span>
+      <span class="status"><span class="dot b"></span><span class="txt b">运行中 35%</span></span>
+    </div>
+    <div class="row">
+      <span class="name">TC-012 报告生成</span>
+      <div class="bar-wrap"><div class="fill" style="width:0%;background:#eef1f6"></div></div>
+      <span class="time">—</span>
+      <span class="status"><span style="color:#999">等待执行</span></span>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <span>共 12 个测试用例 · 7 PASS · 1 FAIL · 3 运行中 · 1 待执行</span>
+      <span id="footerTime" style="font-family:monospace"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+// 时钟
+function updateClock(){
+  var d=new Date();
+  document.getElementById('clock').textContent=
+    d.getHours().toString().padStart(2,'0')+':'+
+    d.getMinutes().toString().padStart(2,'0')+':'+
+    d.getSeconds().toString().padStart(2,'0');
+  document.getElementById('footerTime').textContent=
+    d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0')
+    +' '+d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')+':'+d.getSeconds().toString().padStart(2,'0');
+}
+setInterval(updateClock,1000);updateClock();
+
+// 仿真已执行时间
+(function(){
+  var start=new Date();start.setHours(9,0,12,0);
+  function tick(){
+    var now=new Date(),diff=Math.floor((now-start)/1000);
+    var m=Math.floor(diff/60),s=diff%60;
+    document.getElementById('elapsedDisplay').textContent=m+'m '+s+'s';
+  }
+  setInterval(tick,1000);tick();
+})();
+</script>
+</body>
+</html>

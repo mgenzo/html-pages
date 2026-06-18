@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>开机进度 — 全息地球</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#f0f3f7;font-family:system-ui,-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;color:#1a2332}
+.card{background:#fff;border-radius:16px;border:1px solid #dde2e8;padding:24px 20px 18px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.06);max-width:680px;width:100%}
+.card h1{font-size:20px;font-weight:600;letter-spacing:2px;margin-bottom:2px}
+.card .sub{font-size:12px;color:#8899aa;margin-bottom:14px;letter-spacing:1px}
+.ctl{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px;background:#f5f7fa;border-radius:10px;padding:10px 18px;border:1px solid #dde2e8}
+.ctl label{color:#556677;font-size:13px}
+.ctl input[type=range]{flex:1;max-width:300px;-webkit-appearance:none;height:4px;border-radius:2px;background:linear-gradient(90deg,#0077cc,#cc3366,#8855cc);outline:none}
+.ctl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;cursor:pointer;border:2px solid #0077cc;box-shadow:0 0 8px rgba(0,119,204,.3)}
+.ctl .pv{font-weight:700;color:#0077cc;font-size:18px;min-width:40px;text-align:right}
+.wrap{position:relative;width:100%;aspect-ratio:2/1;border-radius:10px;background:#f5f7fa;overflow:hidden;border:1px solid #dde2e8;margin-bottom:10px}
+.wrap canvas{width:100%;height:100%;display:block}
+.desc{font-size:12px;color:#667788;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>🌍 全息地球</h1>
+<p class="sub">HOLO GLOBE · 信标站联网</p>
+<div class="ctl">
+<label>进度</label>
+<input type="range" id="sl" min="0" max="100" value="35">
+<span class="pv" id="sv">35%</span>
+</div>
+<div class="wrap"><canvas id="cv" width="800" height="400"></canvas></div>
+<p class="desc">15个信标站 · 光束互联 · 经纬网格 · 数据流粒子 · 外圈轨道环</p>
+</div>
+<script>
+const sl=document.getElementById('sl'),sv=document.getElementById('sv');
+let val=35,aid,gt=0;
+
+function draw(){
+  const cv=document.getElementById('cv');if(!cv)return;
+  const ctx=cv.getContext('2d');ctx.clearRect(0,0,800,400);
+  const p=val/100,cx=400,cy=200,R=140;
+
+  ctx.fillStyle='#f5f7fa';ctx.fillRect(0,0,800,400);
+  for(let ri=0;ri<2;ri++){
+    const rr=R+18+ri*14;
+    ctx.strokeStyle='rgba(0,119,204,'+(0.04+0.05*p)+')';ctx.lineWidth=0.6;
+    ctx.setLineDash([4,10]);
+    ctx.beginPath();ctx.arc(cx,cy,rr,0,6.28);ctx.stroke();ctx.setLineDash([]);
+    for(let m=0;m<10;m++){
+      ctx.fillStyle='rgba(0,119,204,'+(0.06*p)+')';
+      ctx.beginPath();ctx.arc(cx+rr*Math.cos(m/10*6.28+gt/5000+ri),cy+rr*Math.sin(m/10*6.28+gt/5000+ri),1.5,0,6.28);ctx.fill();
+    }
+  }
+  const bg=ctx.createRadialGradient(cx,cy,R*0.3,cx,cy,R+40);
+  bg.addColorStop(0,'rgba(0,119,204,'+(0.02*p)+')');bg.addColorStop(0.6,'rgba(0,119,204,'+(0.04*p)+')');bg.addColorStop(1,'rgba(0,119,204,0)');
+  ctx.fillStyle=bg;ctx.beginPath();ctx.arc(cx,cy,R+40,0,6.28);ctx.fill();
+  ctx.strokeStyle='rgba(0,119,204,'+(0.1+0.22*p)+')';ctx.lineWidth=0.6;
+  for(let i=0;i<12;i++){ctx.beginPath();ctx.ellipse(cx,cy,Math.abs(R*0.72*Math.sin(i/12*6.28+gt/3000)),R,0,0,6.28);ctx.stroke();}
+  for(let i=1;i<6;i++){ctx.beginPath();ctx.ellipse(cx,cy-R+i*R*0.4,R*0.88,R*0.04,0,0,6.28);ctx.stroke();}
+  const pts=[[0.22,0.28],[0.68,0.22],[0.50,0.58],[0.82,0.48],[0.28,0.68],[0.12,0.52],[0.88,0.38],[0.58,0.78],[0.38,0.18],[0.72,0.65],[0.45,0.82],[0.15,0.72],[0.78,0.15],[0.62,0.35],[0.35,0.48]];
+  const vis=Math.floor(p*pts.length);const conn=Math.min(vis*2,Math.floor(p*(pts.length*2-2)));
+  for(let i=0;i<conn;i++){
+    const ai=i%vis,bi=(i+1+Math.floor(i/vis))%vis;if(ai===bi)continue;
+    const a=pts[ai],b=pts[bi];
+    const ax=cx+(a[0]-0.5)*R*1.95,ay=cy+(a[1]-0.5)*R*1.95,bx=cx+(b[0]-0.5)*R*1.95,by=cy+(b[1]-0.5)*R*1.95;
+    ctx.strokeStyle='rgba(0,119,204,'+(0.06+0.12*p*(1-i/conn))+')';ctx.lineWidth=0.6+1*p*(1-i/conn);
+    ctx.beginPath();ctx.moveTo(ax,ay);ctx.quadraticCurveTo((ax+bx)/2,(ay+by)/2-10*Math.sin(i*1.7),bx,by);ctx.stroke();
+  }
+  for(let i=0;i<vis;i++){
+    const bl=0.5+0.3*Math.sin(gt/2000+i*1.7);
+    const x=cx+(pts[i][0]-0.5)*R*1.95,y=cy+(pts[i][1]-0.5)*R*1.95;
+    ctx.beginPath();ctx.arc(x,y,5+3*bl,0,6.28);ctx.fillStyle='rgba(0,119,204,'+(0.04*bl*p)+')';ctx.fill();
+    ctx.beginPath();ctx.arc(x,y,1.5+1.5*bl,0,6.28);ctx.fillStyle='rgba(0,119,204,'+(0.3+0.6*p*bl)+')';ctx.fill();
+    ctx.beginPath();ctx.arc(x-0.8,y-0.8,0.7,0,6.28);ctx.fillStyle='rgba(255,255,255,'+(0.15*bl)+')';ctx.fill();
+  }
+  for(let i=0;i<Math.floor(4+14*p);i++){
+    const si=Math.floor(Math.random()*vis);const ei=(si+1+Math.floor(Math.random()*(vis-1)))%vis;
+    if(si===ei)continue;
+    const sa=pts[si],ea=pts[ei];
+    const sx=cx+(sa[0]-0.5)*R*1.95,sy=cy+(sa[1]-0.5)*R*1.95,ex=cx+(ea[0]-0.5)*R*1.95,ey=cy+(ea[1]-0.5)*R*1.95;
+    const t=(i/pts.length+gt/3000)%1;
+    ctx.fillStyle='rgba(180,120,200,'+(0.12+0.22*p)+')';
+    ctx.beginPath();ctx.arc(sx+(ex-sx)*t,sy+(ey-sy)*t-10*Math.sin(si*1.7)*Math.sin(t*3.14),1.2+1.5*p,0,6.28);ctx.fill();
+  }
+  ctx.fillStyle='rgba(0,119,204,'+(0.3+0.7*p)+')';
+  ctx.font='bold 32px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(val+'%',cx,cy);
+  ctx.fillStyle='#556677';ctx.font='10px sans-serif';ctx.textBaseline='top';
+  ctx.fillText('GLOBE  '+vis+'/'+pts.length+' stations  '+conn+' links',cx,cy+R+32);
+  ctx.fillStyle='rgba(0,119,204,0.1)';ctx.font='9px sans-serif';ctx.textAlign='left';ctx.textBaseline='top';
+  ctx.fillText('● SATELLITE NETWORK',12,10);
+}
+
+function loop(t){gt=t||0;draw();aid=requestAnimationFrame(loop);}
+sl.addEventListener('input',()=>{val=parseInt(sl.value);sv.textContent=val+'%';});
+loop();
+</script>
+</body>
+</html>
