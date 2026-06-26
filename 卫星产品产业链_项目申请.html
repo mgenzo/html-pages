@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卫星产品产业链 —— 项目申请汇报</title>
+<style>
+  /* ============ 全局重置 ============ */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    background: #E8ECF0;
+    color: #1D1D1F;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* ============ 幻灯片容器 ============ */
+  .deck {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .slide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+  .slide.active {
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 10;
+  }
+  .slide-inner {
+    width: 90%;
+    max-width: 1200px;
+    height: 88%;
+    max-height: 700px;
+    background: #FFFFFF;
+    border-radius: 4px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ============ 页眉 ============ */
+  .header {
+    flex: 0 0 auto;
+    background: #003366;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 0 32px;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0;
+    width: 6px; height: 100%;
+    background: #CC0000;
+  }
+  .header h2 {
+    color: #FFFFFF;
+    font-family: Georgia, "KaiTi", serif;
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+  .header .page-indicator {
+    margin-left: auto;
+    color: rgba(255,255,255,0.6);
+    font-size: 13px;
+    font-family: Georgia, serif;
+  }
+  .header .logo-area {
+    margin-left: 24px;
+    color: rgba(255,255,255,0.3);
+    font-size: 12px;
+    border: 1px dashed rgba(255,255,255,0.2);
+    padding: 4px 12px;
+    border-radius: 4px;
+  }
+
+  /* ============ 核心信息栏 ============ */
+  .key-bar {
+    flex: 0 0 auto;
+    background: #E8F4FC;
+    padding: 10px 32px;
+    border-left: 6px solid #0066CC;
+    font-size: 14px;
+    color: #333333;
+    line-height: 1.5;
+  }
+
+  /* ============ 内容区 ============ */
+  .content {
+    flex: 1;
+    padding: 24px 32px;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  /* ============ 页脚 ============ */
+  .footer {
+    flex: 0 0 auto;
+    border-top: 1px solid #E8F4FC;
+    padding: 8px 32px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #999999;
+  }
+  .footer .page-num {
+    color: #666666;
+    font-family: Georgia, serif;
+    font-size: 13px;
+  }
+
+  /* ============ 封面 ============ */
+  .slide-cover .header { background: transparent; height: 12px; }
+  .slide-cover .header::before { background: #CC0000; height: 12px; }
+  .slide-cover .cover-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+  .slide-cover .cover-body h1 {
+    font-family: Georgia, "KaiTi", serif;
+    font-size: 48px;
+    color: #003366;
+    font-weight: bold;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .slide-cover .cover-body .subtitle {
+    font-size: 22px;
+    color: #666666;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  .slide-cover .cover-body .divider {
+    width: 300px;
+    height: 2px;
+    background: #0066CC;
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .slide-cover .cover-body .divider::after {
+    content: '';
+    position: absolute;
+    top: -4px; left: 50%;
+    width: 10px; height: 10px;
+    background: #0066CC;
+    border-radius: 50%;
+    transform: translateX(-50%);
+  }
+  .slide-cover .cover-body .meta {
+    margin-top: 36px;
+    text-align: center;
+    color: #666666;
+    font-size: 16px;
+    line-height: 2;
+  }
+  .slide-cover .footer { border-top: none; background: #F5F7FA; justify-content: center; }
+
+  /* ============ 卡片组件 ============ */
+  .card-grid { display: grid; gap: 16px; height: 100%; }
+  .card-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .card-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .card-grid.rows-auto { grid-template-rows: auto; }
+  
+  .card {
+    background: #F8FAFC;
+    border: 1px solid #D0D7E0;
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .card .top-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    border-radius: 8px 8px 0 0;
+  }
+  .card .top-bar.blue { background: #003366; }
+  .card .top-bar.light-blue { background: #0066CC; }
+  .card .top-bar.red { background: #CC0000; }
+  
+  .card .num-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    color: #FFF;
+    font-family: Georgia, serif;
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+  }
+  .card .num-badge.blue { background: #003366; }
+  .card .num-badge.light-blue { background: #0066CC; }
+  .card .num-badge.red { background: #CC0000; }
+  
+  .card h4 {
+    font-family: "SimHei", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    color: #003366;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+  .card p, .card li {
+    font-size: 13px;
+    color: #333333;
+    line-height: 1.6;
+  }
+  .card ul { list-style: none; padding: 0; }
+  .card ul li {
+    padding: 6px 0;
+    padding-left: 16px;
+    position: relative;
+    border-bottom: 1px solid #E8F4FC;
+  }
+  .card ul li:last-child { border-bottom: none; }
+  .card ul li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 12px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #003366;
+  }
+  .card ul li.blue-dot::before { background: #0066CC; }
+  .card ul li.red-dot::before { background: #CC0000; }
+
+  /* 双栏非卡片布局 */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    height: 100%;
+  }
+  .col-item {
+    background: #F8FAFC;
+    border: 1px solid #D0D7E0;
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .col-item .bar {
+    position: absolute;
+    left: 0; top: 0;
+    width: 6px; height: 100%;
+  }
+  .col-item .bar.red { background: #CC0000; }
+  .col-item .bar.blue { background: #0066CC; }
+  .col-item .tag {
+    display: inline-block;
+    padding: 3px 14px;
+    border-radius: 4px;
+    color: #FFF;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: "SimHei", sans-serif;
+    margin-bottom: 10px;
+  }
+  .col-item .tag.red { background: #CC0000; }
+  .col-item .tag.blue { background: #0066CC; }
+  .col-item h4 {
+    font-family: "SimHei", "Microsoft YaHei", sans-serif;
+    font-size: 18px;
+    color: #003366;
+    margin-bottom: 8px;
+  }
+  .col-item p {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.7;
+  }
+  .col-item .highlight {
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 8px;
+  }
+  .col-item .highlight.red { color: #CC0000; }
+  .col-item .highlight.blue { color: #0066CC; }
+
+  /* 列表 */
+  .scenario-list { display: flex; flex-direction: column; gap: 8px; }
+  .scenario-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 10px 16px;
+    background: #F8FAFC;
+    border-radius: 6px;
+    border-left: 4px solid #0066CC;
+  }
+  .scenario-item .dot {
+    width: 8px; height: 8px;
+    background: #0066CC;
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  .scenario-item .text h5 {
+    font-family: "SimHei", "Microsoft YaHei", sans-serif;
+    font-size: 14px;
+    color: #003366;
+    font-weight: bold;
+  }
+  .scenario-item .text p {
+    font-size: 13px;
+    color: #444;
+    line-height: 1.5;
+  }
+
+  /* 底部总结框 */
+  .summary-box {
+    background: #E8F4FC;
+    border-radius: 6px;
+    padding: 16px 20px;
+    border-left: 6px solid #003366;
+    margin-top: auto;
+  }
+  .summary-box h5 {
+    font-family: "SimHei", "Microsoft YaHei", sans-serif;
+    font-size: 14px;
+    color: #003366;
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  .summary-box p {
+    font-size: 13px;
+    color: #333;
+  }
+
+  /* ============ 导航 ============ */
+  .nav-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+    background: rgba(255,255,255,0.90);
+    padding: 8px 16px;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+  }
+  .nav-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #D0D7E0;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+  }
+  .nav-dot:hover { background: #0066CC; transform: scale(1.2); }
+  .nav-dot.active { background: #003366; transform: scale(1.3); }
+  .nav-arrow {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #666;
+    padding: 0 8px;
+    transition: color 0.2s;
+  }
+  .nav-arrow:hover { color: #003366; }
+
+  /* ============ 键盘提示 ============ */
+  .kbd-hint {
+    position: fixed;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #999;
+    font-size: 11px;
+    z-index: 100;
+    opacity: 0.5;
+  }
+
+  /* ============ 响应式 ============ */
+  @media (max-width: 768px) {
+    .slide-inner { width: 96%; height: 92%; }
+    .card-grid.cols-2,
+    .card-grid.cols-3,
+    .card-grid.cols-4 { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .slide-cover .cover-body h1 { font-size: 32px; }
+    .header h2 { font-size: 16px; }
+    .content { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- ==================== SLIDE 1 - 封面 ==================== -->
+  <div class="slide slide-cover active" data-index="0">
+    <div class="slide-inner">
+      <div class="header"></div>
+      <div class="cover-body">
+        <h1>卫星产品产业链</h1>
+        <p class="subtitle">卫星通信技术、关键特点与测试解决方案</p>
+        <div class="divider"></div>
+        <div class="meta">
+          <strong>项目申请汇报</strong><br>
+          技术研究报告 · 2026年6月
+        </div>
+      </div>
+      <div class="footer">
+        <span></span>
+        <span class="page-num">01 / 05</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 2 - 背景及应用场景 ==================== -->
+  <div class="slide" data-index="1">
+    <div class="slide-inner">
+      <div class="header">
+        <h2>卫星通信背景及应用场景</h2>
+        <span class="page-indicator">02 / 05</span>
+        <span class="logo-area">项目申请</span>
+      </div>
+      <div class="key-bar">全球尚有20亿人口未接入互联网，80%以上陆地区域和95%海洋区域无地面网络覆盖</div>
+      <div class="content">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;height:100%;">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="scenario-item">
+              <div class="dot"></div>
+              <div class="text">
+                <h5>公众用户增强移动宽带（eMBB）</h5>
+                <p>为偏远村庄、海岛、矿山、民航飞机、远洋船只提供宽带连接</p>
+              </div>
+            </div>
+            <div class="scenario-item">
+              <div class="dot"></div>
+              <div class="text">
+                <h5>数据回传</h5>
+                <p>为偏远地区地面5G基站提供到公众数据网络的回传</p>
+              </div>
+            </div>
+            <div class="scenario-item">
+              <div class="dot"></div>
+              <div class="text">
+                <h5>物联网</h5>
+                <p>车队管理、资产跟踪、远程道路警报、管道等基础设施状态监控</p>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="scenario-item">
+              <div class="dot"></div>
+              <div class="text">
+                <h5>应急救灾与公共安全</h5>
+                <p>为警察、消防和医疗救护提供随时随地的通信服务</p>
+              </div>
+            </div>
+            <div class="scenario-item">
+              <div class="dot"></div>
+              <div class="text">
+                <h5>移动广播用例</h5>
+                <p>直接向手持终端或车载终端提供广播/多播业务，灾害预警即时发布</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <span>数据来源：3GPP TS 38.821</span>
+        <span>卫星通信背景及应用场景</span>
+        <span class="page-num">02</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 3 - 轨道分类 ==================== -->
+  <div class="slide" data-index="2">
+    <div class="slide-inner">
+      <div class="header">
+        <h2>卫星通信技术分类——轨道高度</h2>
+        <span class="page-indicator">03 / 05</span>
+        <span class="logo-area">项目申请</span>
+      </div>
+      <div class="key-bar">星载平台（LEO/MEO/GEO）+ 机载平台（HAPS）组成多层次卫星通信网络</div>
+      <div class="content">
+        <div class="card-grid cols-3" style="grid-template-rows:1fr;">
+          <div class="card">
+            <div class="top-bar blue"></div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+              <span class="num-badge blue">01</span>
+              <h4 style="margin:0;">GEO卫星</h4>
+            </div>
+            <ul>
+              <li>地球同步轨道</li>
+              <li>高度：35,786km</li>
+              <li>提供大陆、区域或本地服务</li>
+            </ul>
+            <div style="flex:1;min-height:80px;background:#E8F4FC;border-radius:4px;margin-top:auto;display:flex;align-items:center;justify-content:center;color:#999;font-size:12px;">GEO轨道示意图</div>
+          </div>
+          <div class="card">
+            <div class="top-bar light-blue"></div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+              <span class="num-badge light-blue">02</span>
+              <h4 style="margin:0;">LEO/MEO星座</h4>
+            </div>
+            <ul>
+              <li>低轨/中轨卫星</li>
+              <li>北半球和南半球服务</li>
+              <li>可扩展至包括极地在内的全球覆盖</li>
+            </ul>
+            <div style="flex:1;min-height:80px;background:#E8F4FC;border-radius:4px;margin-top:auto;display:flex;align-items:center;justify-content:center;color:#999;font-size:12px;">星座覆盖示意图</div>
+          </div>
+          <div class="card">
+            <div class="top-bar red"></div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+              <span class="num-badge red">03</span>
+              <h4 style="margin:0;">HAPS高空平台</h4>
+            </div>
+            <ul>
+              <li>机载平台</li>
+              <li>飞机、气球和飞艇</li>
+              <li>使用地面移动网络相同频段</li>
+            </ul>
+            <div style="flex:1;min-height:80px;background:#E8F4FC;border-radius:4px;margin-top:auto;display:flex;align-items:center;justify-content:center;color:#999;font-size:12px;">HAPS架构示意图</div>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <span>数据来源：3GPP TS 38.821</span>
+        <span>卫星通信技术分类——轨道高度</span>
+        <span class="page-num">03</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 4 - 关键技术 ==================== -->
+  <div class="slide" data-index="3">
+    <div class="slide-inner">
+      <div class="header">
+        <h2>卫星通信关键技术——卫星通信特点</h2>
+        <span class="page-indicator">04 / 05</span>
+        <span class="logo-area">项目申请</span>
+      </div>
+      <div class="key-bar">卫星通信面临高时延、大多普勒频移、低信噪比、复杂移动性管理四大技术挑战</div>
+      <div class="content">
+        <div class="two-col">
+          <div class="col-item">
+            <div class="bar red"></div>
+            <span class="tag red">挑战一</span>
+            <h4>高传输时延</h4>
+            <p>地面站/用户终端与卫星之间距离较远，带来比地面蜂窝网络更高的传输延迟。</p>
+            <p class="highlight red">GEO单路传输时延可达数百毫秒</p>
+          </div>
+          <div class="col-item">
+            <div class="bar blue"></div>
+            <span class="tag blue">挑战二</span>
+            <h4>高多普勒频移</h4>
+            <p>LEO卫星围绕地球做高速环形运动，导致多普勒变化和定时变化。</p>
+            <p class="highlight blue">频偏可达几十千赫兹甚至兆赫兹级别</p>
+          </div>
+          <div class="col-item">
+            <div class="bar blue"></div>
+            <span class="tag blue">挑战三</span>
+            <h4>低信噪比</h4>
+            <p>卫星通信传输距离长、发射频率高，造成极大传播损耗；卫星载荷器件限制进一步恶化信噪比。</p>
+          </div>
+          <div class="col-item">
+            <div class="bar red"></div>
+            <span class="tag red">挑战四</span>
+            <h4>复杂移动性管理</h4>
+            <p>地面网络小区固定，仅终端移动；NTN场景下小区和终端同时在移动，需重新设计切换和波束管理。</p>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <span>数据来源：3GPP TS 38.811</span>
+        <span>卫星通信关键技术——卫星通信特点</span>
+        <span class="page-num">04</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 5 - 测试方案 ==================== -->
+  <div class="slide" data-index="4">
+    <div class="slide-inner">
+      <div class="header">
+        <h2>卫通测试需求与解决方案汇总</h2>
+        <span class="page-indicator">05 / 05</span>
+        <span class="logo-area">项目申请</span>
+      </div>
+      <div class="key-bar">对照卫星通信各环节测试需求，遵循标准体系技术要求和测试规范</div>
+      <div class="content" style="display:flex;flex-direction:column;">
+        <div class="card-grid cols-4" style="flex:1;">
+          <div class="card">
+            <div class="top-bar blue"></div>
+            <h4>用户侧设备测试</h4>
+            <ul>
+              <li>终端射频性能测试</li>
+              <li>协议一致性测试</li>
+              <li>OTA辐射性能测试</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="top-bar light-blue"></div>
+            <h4>网络侧设备测试</h4>
+            <ul>
+              <li class="blue-dot">基站/RRU测试</li>
+              <li class="blue-dot">核心网测试</li>
+              <li class="blue-dot">回传链路测试</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="top-bar red"></div>
+            <h4>相控阵天线测试</h4>
+            <ul>
+              <li class="red-dot">波束赋形测试</li>
+              <li class="red-dot">EIRP/EIS测量</li>
+              <li class="red-dot">扫描特性测试</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="top-bar blue"></div>
+            <h4>卫星在轨测试</h4>
+            <ul>
+              <li>在轨性能验证</li>
+              <li>EIRP/G/T测量</li>
+              <li>转发器特性测试</li>
+            </ul>
+          </div>
+        </div>
+        <div class="summary-box" style="margin-top:12px;">
+          <h5>四大类解决方案可进一步细分</h5>
+          <p>形成丰富的卫星通信测试解决方案集群，覆盖卫星通信全产业链测试需求</p>
+        </div>
+      </div>
+      <div class="footer">
+        <span>卫通测试解决方案推介</span>
+        <span>卫通测试需求与解决方案汇总</span>
+        <span class="page-num">05</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============ 导航 ============ -->
+<div class="nav-bar">
+  <button class="nav-arrow" id="prevBtn">◀</button>
+  <div id="navDots"></div>
+  <button class="nav-arrow" id="nextBtn">▶</button>
+</div>
+<div class="kbd-hint">← → 或 Space 翻页 · G 跳转</div>
+
+<script>
+(function() {
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  // 生成导航圆点
+  const dotsContainer = document.getElementById('navDots');
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.dataset.index = i;
+    dot.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(dot);
+  }
+
+  function goTo(idx) {
+    if (idx < 0) idx = 0;
+    if (idx >= total) idx = total - 1;
+    slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+    document.querySelectorAll('.nav-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+    current = idx;
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Space') {
+      e.preventDefault(); goTo(current + 1);
+    }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(current - 1); }
+    if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    if (e.key === 'End') { e.preventDefault(); goTo(total - 1); }
+    if (e.key === 'g' || e.key === 'G') {
+      e.preventDefault();
+      const n = prompt('跳转到第几页？（1-' + total + '）');
+      if (n) { const idx = parseInt(n) - 1; if (idx >= 0 && idx < total) goTo(idx); }
+    }
+  });
+
+  // 触屏滑动
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
+  document.addEventListener('touchend', (e) => {
+    const diff = touchStartX - e.changedTouches[0].screenX;
+    if (Math.abs(diff) > 50) { diff > 0 ? goTo(current + 1) : goTo(current - 1); }
+  });
+})();
+</script>
+</body>
+</html>
